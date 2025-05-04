@@ -44,10 +44,11 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this);
         /* generating a world with a certain Biome */
         generateVariableGrass();
-        //generateWorldWithScarceSprites();
+        generateWorldWithScarceSprites();
+
 
         /* --- drop one creature in the center --- */
-        creatures.add(new Creature(WORLD_WIDTH / 2, WORLD_HEIGHT / 2));
+        creatures.add(new Creature(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, "assets/tiles/dig_dug.png"));
 
         /* --- kick‑off the game loop --- */
         timer = new Timer(1000 / FPS, this);
@@ -61,7 +62,7 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         repaint();
     }
 
-    private void updateSimulation() {
+    public void updateSimulation() {
         for (Creature c : creatures) c.update();
     }
 
@@ -72,7 +73,7 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         drawWorld(g);
     }
 
-    private void drawWorld(Graphics g) {
+    public void drawWorld(Graphics g) {
         /* draw background tiles */
         for (int x = 0; x < WORLD_WIDTH; x++)
             for (int y = 0; y < WORLD_HEIGHT; y++)
@@ -104,19 +105,18 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         for (int x = 0; x < WORLD_WIDTH; x++) {
             for (int y = 0; y < WORLD_HEIGHT; y++) {
                 double roll = random.nextDouble(); // [0.0,1.0)
-                if (roll < 0.005) {
-                    // 0.5% chance to be an oak tree
+                if (roll < 0.01) {
                     tiles[x][y] = Tile.OAK_TREE;
-                } else if (roll < 0.008) {
-                    // next 0.3% chance for a house
+                } else if (roll < 0.03) {
                     tiles[x][y] = Tile.HOUSE;
-                } else if (roll < 0.010) {
-                    // next 0.2% chance for a chicken
+                    //creatures.add(new Creature(x, y, "assets/tiles/House.png"));
+                } else if (roll < 0.04) {
                     tiles[x][y] = Tile.CHICKEN;
-                } else {
+                   // creatures.add(new Creature(x, y, "assets/tiles/Chicken.png"));
+                } //else {
                     // otherwise, pick your normal biome tile
-                    tiles[x][y] = pickDefaultBiomeTile();
-                }
+                    //tiles[x][y] = pickDefaultBiomeTile();
+                //}
             }
         }
     }
@@ -133,11 +133,12 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
             // spawn another roaming creature at a random spot
             int rx = (int) (Math.random() * WORLD_WIDTH);
             int ry = (int) (Math.random() * WORLD_HEIGHT);
-            creatures.add(new Creature(rx, ry));
+            creatures.add(new Creature(rx, ry, "assets/tiles/dig_dug.png"));
         }
         switch (e.getKeyCode()) {
             case KeyEvent.VK_SPACE:
                 // … existing spawn logic …
+                //do nothing ?
                 break;
             case KeyEvent.VK_1:
                 currentBiome = 0;
@@ -179,9 +180,6 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         System.out.println("Hello World, I'm activating MiniWorld!");
     }
 
-    /* ====================================================== */
-    /* ====================  HELPER TYPES  ================== */
-
     /**
      * Very small, solid‑colour floor tiles.
      */
@@ -192,11 +190,11 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         GRASS_LIGHT(new Color(50, 180, 50)),
         GRASS_DARK(new Color(20, 100, 20)),
 
-        OAK_TREE("assets/tiles/Oak-Tree.png"),
+        OAK_TREE("assets/tiles/Oak_Tree.png"),
         HOUSE("assets/tiles/House.png"),
         CHICKEN("assets/tiles/Chicken.png");
 
-        private BufferedImage img = new BufferedImage(TILE_SIZE, TILE_SIZE, BufferedImage.TYPE_INT_ARGB);;
+        private BufferedImage img = new BufferedImage(TILE_SIZE, TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
 
         Tile(String path) {
             // load the image once, when the enum constant is created
@@ -231,35 +229,48 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
     private class Creature {
         int x, y;                    // tile coordinates
         final Color color = Color.WHITE;
+        private final BufferedImage sprite;
 
-        Creature(int x, int y) {
+        public Creature(int x, int y, String spritePath) {
             this.x = x;
             this.y = y;
+            BufferedImage tmp;
+
+            try {
+                tmp = ImageIO.read(new File(spritePath));
+            } catch (IOException e) {
+                e.printStackTrace();
+                tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+            }
+            tmp.setRGB(0, 0, Color.MAGENTA.getRGB());
+
+            sprite = tmp;
         }
 
-        void update() {
-            int dir = (int) (Math.random() * 4);
-            switch (dir) {
-                case 0:
-                    if (x > 0) x--;
-                    break; // left
-                case 1:
-                    if (x < WORLD_WIDTH - 1) x++;
-                    break; // right
-                case 2:
-                    if (y > 0) y--;
-                    break; // up
-                case 3:
-                    if (y < WORLD_HEIGHT - 1) y++;
-                    break; // down
+            void update() {
+                int dir = (int) (Math.random() * 4);
+                switch (dir) {
+                    case 0:
+                        if (x > 0) x--;
+                        break; // left
+                    case 1:
+                        if (x < WORLD_WIDTH - 1) x++;
+                        break; // right
+                    case 2:
+                        if (y > 0) y--;
+                        break; // up
+                    case 3:
+                        if (y < WORLD_HEIGHT - 1) y++;
+                        break; // down
+                }
+            }
+
+            void draw (Graphics g){
+                g.setColor(color);
+                g.drawImage(sprite,x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, null);
+
             }
         }
-
-        void draw(Graphics g) {
-            g.setColor(color);
-            g.fillOval(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
-        }
     }
-}
+
 
