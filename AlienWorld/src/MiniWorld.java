@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 
 /**
  * A *tiny* self‑contained “creatures in a park” demo.
@@ -16,6 +18,8 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
     private static final int WORLD_HEIGHT  = 50;      // tiles
     private static final int FPS           = 10;      // simulation steps/second
     private int currentBiome = 0; /** 0 = GRASS, 1 == SAND, 2 == WATER **/
+    private final Random random = new Random();
+
 
 
     /* ===== World state ===== */
@@ -70,9 +74,11 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
     }
 
     private void fillWorldWith(Tile tile) {
+        Tile[] grassVariants = {Tile.GRASS_LIGHT, Tile.GRASS, Tile.GRASS_DARK};
         for (int x = 0; x < WORLD_WIDTH; x++) {
             for (int y = 0; y < WORLD_HEIGHT; y++) {
-                tiles[x][y] = tile;
+                tiles[x][y] = grassVariants[random.nextInt(grassVariants.length)];
+
             }
         }
     }
@@ -130,7 +136,9 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
     private enum Tile {
         GRASS(new Color(34, 139, 34)),
         SAND (new Color(194, 178, 128)),
-        WATER(new Color( 28, 107, 160));
+        WATER(new Color( 28, 107, 160)),
+        GRASS_LIGHT(new Color(50, 180, 50)),
+        GRASS_DARK(new Color(20, 100, 20));
 
         private final Color c;
         Tile(Color c) { this.c = c; }
@@ -159,6 +167,7 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         void draw(Graphics g) {
             g.setColor(color);
             g.fillOval(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
         }
     }
 }
