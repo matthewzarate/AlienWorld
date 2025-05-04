@@ -44,7 +44,7 @@ public class MiniWorld extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this);
         /* generating a world with a certain Biome */
         generateVariableGrass();
-        generateWorldWithScarceSprites();
+        //generateWorldWithScarceSprites();
 
 
         /* --- drop one creature in the center --- */
